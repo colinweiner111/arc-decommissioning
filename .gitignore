@@ -1,0 +1,21 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.code-workspace
+
+# Python / tooling
+__pycache__/
+*.pyc
+
+# Logs / temp
+*.log
+tmp/
+temp/
+*.tmp
+
+# Artifacts
+*.csv
+*.json
+*.out
