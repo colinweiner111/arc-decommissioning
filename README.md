@@ -49,7 +49,7 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 ### PowerShell
 ```powershell
 # List Arc machines (and save CSV)
-.\scripts\list-arc-machines.ps1 -CsvPath .rc-machines.csv
+.\scripts\list-arc-machines.ps1 -CsvPath .\rc-machines.csv
 
 # List extensions on a machine
 .\scripts\list-arc-extensions.ps1 -MachineName my-arc -ResourceGroup rg-arc
