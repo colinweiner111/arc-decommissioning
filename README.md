@@ -46,19 +46,23 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 
 ## Usage examples
 
+💡 **Placeholders**:
+- `<MACHINE_NAME>` = the Arc-connected server's name (Azure resource name)
+- `<RESOURCE_GROUP>` = the Azure resource group that contains the Arc machine resource
+
 ### PowerShell
 ```powershell
 # List Arc machines (and save CSV)
 .\scripts\list-arc-machines.ps1 -CsvPath .\rc-machines.csv
 
 # List extensions on a machine
-.\scripts\list-arc-extensions.ps1 -MachineName my-arc -ResourceGroup rg-arc
+.\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
 
 # Remove common Arc extensions
-.\scriptsemove-arc-extension.ps1 -MachineName my-arc -ResourceGroup rg-arc -CommonSet
+.\scriptsemove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -CommonSet
 
 # Disconnect (Azure-side) if host unreachable
-.\scripts\disconnect-arc.ps1 -MachineName my-arc -ResourceGroup rg-arc
+.\scripts\disconnect-arc.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
 
 # Policy hygiene (dry-run)
 .\scripts\policy-hygiene.ps1 -Scope /subscriptions/00000000-0000-0000-0000-000000000000
@@ -76,13 +80,13 @@ chmod +x scripts/*.sh
 ./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ./arc-machines.csv
 
 # List extensions on a machine
-./scripts/list-arc-extensions.sh my-arc rg-arc
+./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
 
 # Remove common Arc extensions
-./scripts/remove-arc-extension.sh -m my-arc -g rg-arc --common-set
+./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
 
 # Disconnect (Azure-side) if host unreachable
-./scripts/disconnect-arc.sh -m my-arc -g rg-arc
+./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
 
 # Policy hygiene (dry-run)
 ./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
