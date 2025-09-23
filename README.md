@@ -94,8 +94,7 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
   -ResourceGroup <RESOURCE_GROUP>
 
 # Remove an Arc extension by name (example: DependencyAgentWindows)
-.\scripts
-emove-arc-extension.ps1 `
+.\scripts\remove-arc-extension.ps1 `
   -MachineName <MACHINE_NAME> `
   -ResourceGroup <RESOURCE_GROUP> `
   -ExtensionName DependencyAgentWindows
