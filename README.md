@@ -1,3 +1,4 @@
+
 # Azure Arc Decommissioning
 
 This repo contains a practical runbook and helper scripts for safely decommissioning **Azure Arc** at scale (≈30+ servers).
@@ -53,13 +54,14 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 ### PowerShell
 ```powershell
 # List Arc machines (and save CSV)
-.\scripts\list-arc-machines.ps1 -CsvPath .\rc-machines.csv
+.\scripts\list-arc-machines.ps1 -CsvPath .\arc-machines.csv
 
 # List extensions on a machine
 .\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
 
 # Remove common Arc extensions
-.\scriptsemove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -CommonSet
+.\scripts
+emove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -CommonSet
 
 # Disconnect (Azure-side) if host unreachable
 .\scripts\disconnect-arc.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
@@ -94,6 +96,32 @@ chmod +x scripts/*.sh
 # Policy hygiene (perform deletion)
 ./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)' true
 ```
+
+## Azure Cloud Shell tips
+
+If you're running these commands in **Azure Cloud Shell**:
+
+- **Install/upgrade Resource Graph extension** (required for inventory queries):
+  ```bash
+  az extension add --name resource-graph --upgrade
+  ```
+
+- **Bash examples** (Cloud Shell defaults to Bash):
+  ```bash
+  # Persist output in your Cloud Shell drive
+  chmod +x scripts/*.sh
+  ./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ~/clouddrive/arc-machines.csv
+  ./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
+  ./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
+  ./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
+  ```
+
+- **PowerShell shell in Cloud Shell**: switch to PowerShell (via UI or `pwsh`) and use the `*.ps1` scripts:
+  ```powershell
+  az extension add --name resource-graph --upgrade
+  .\scripts\list-arc-machines.ps1 -CsvPath ~/clouddrive/arc-machines.csv
+  .\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
+  ```
 
 ## Requirements
 - **Azure CLI** (with extension: `resource-graph`; Linux requires `jq` for JSON parsing)
