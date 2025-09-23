@@ -85,47 +85,58 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 ### PowerShell
 ```powershell
 # List Arc machines (and save CSV)
-.\scripts\list-arc-machines.ps1 -CsvPath .\rc-machines.csv
+.\scripts\list-arc-machines.ps1 `
+  -CsvPath .\rc-machines.csv
 
 # List extensions on a machine
-.\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
+.\scripts\list-arc-extensions.ps1 `
+  -MachineName <MACHINE_NAME> `
+  -ResourceGroup <RESOURCE_GROUP>
 
-# Remove common Arc extensions
-.\scripts
-emove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -CommonSet
+# Remove an Arc extension by name (example: DependencyAgentWindows)
+.\scriptsemove-arc-extension.ps1 `
+  -MachineName <MACHINE_NAME> `
+  -ResourceGroup <RESOURCE_GROUP> `
+  -ExtensionName DependencyAgentWindows
 
-# Disconnect (Azure-side) if host unreachable
-.\scripts\disconnect-arc.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
+# Disconnect if host is unreachable (Azure-side)
+.\scripts\disconnect-arc.ps1 `
+  -MachineName <MACHINE_NAME> `
+  -ResourceGroup <RESOURCE_GROUP>
 
 # Policy hygiene (dry-run)
-.\scripts\policy-hygiene.ps1 -Scope /subscriptions/00000000-0000-0000-0000-000000000000
+.\scripts\policy-hygiene.ps1 `
+  -Scope /subscriptions/00000000-0000-0000-0000-000000000000
 
-# Policy hygiene (delete with WhatIf confirmation)
-.\scripts\policy-hygiene.ps1 -Scope /subscriptions/00000000-0000-0000-0000-000000000000 -Delete -WhatIf
+# Policy hygiene (delete with WhatIf)
+.\scripts\policy-hygiene.ps1 `
+  -Scope /subscriptions/00000000-0000-0000-0000-000000000000 `
+  -Delete -WhatIf
 ```
 
 ### Bash / Linux
 ```bash
-# Make scripts executable (first time)
+# First time only: make scripts executable
 chmod +x scripts/*.sh
 
 # List Arc machines (and save CSV)
-./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ./arc-machines.csv
+./scripts/list-arc-machines.sh   "<SUBSCRIPTION_ID>"   ./arc-machines.csv
 
 # List extensions on a machine
-./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
+./scripts/list-arc-extensions.sh   <MACHINE_NAME>   <RESOURCE_GROUP>
 
-# Remove common Arc extensions
-./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
+# Remove an Arc extension by name (example: DependencyAgentWindows)
+./scripts/remove-arc-extension.sh   -m <MACHINE_NAME>   -g <RESOURCE_GROUP>   -e DependencyAgentWindows
 
-# Disconnect (Azure-side) if host unreachable
-./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
+# Disconnect if host is unreachable (Azure-side)
+./scripts/disconnect-arc.sh   -m <MACHINE_NAME>   -g <RESOURCE_GROUP>
 
 # Policy hygiene (dry-run)
-./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
+REGEX='(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
+./scripts/policy-hygiene.sh   "/subscriptions/00000000-0000-0000-0000-000000000000"   "$REGEX"
 
 # Policy hygiene (perform deletion)
-./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)' true
+./scripts/policy-hygiene.sh   "/subscriptions/00000000-0000-0000-0000-000000000000"   "$REGEX"   true
 ```
 
 ## Azure Cloud Shell tips
