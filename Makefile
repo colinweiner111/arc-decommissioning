@@ -90,3 +90,22 @@ policy-dryrun:
 policy-delete:
 	@test -n "$(SCOPE)" || (echo "Set SCOPE=<scope>"; exit 1)
 	./scripts/policy-hygiene.sh "$(SCOPE)" '$(REGEX)' true
+
+.PHONY: sanitize-check sanitize
+sanitize-check:
+	@! grep -IUPrn --color=always '\x07' -- . \
+	  || (echo "Found ASCII bell(s) ↑ — run 'make sanitize'."; exit 1)
+
+sanitize:
+	@python - <<'PY'
+import os
+for root,_,files in os.walk('.'):
+    for fn in files:
+        if fn.endswith(('.md','.txt','.ps1','.sh','.yaml','.yml','.json')):
+            p=os.path.join(root,fn)
+            with open(p,'rb') as f: b=f.read()
+            if b'\x07' in b:
+                with open(p,'wb') as f: f.write(b.replace(b'\x07',b'\\'))
+                print("fixed", p)
+print("sanitize complete")
+PY
