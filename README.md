@@ -90,8 +90,9 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 # List extensions on a machine
 .\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
 
-# Remove an Arc extension by name (example: DependencyAgentWindows)
-.\scripts\remove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -ExtensionName DependencyAgentWindows
+# Remove common Arc extensions
+.\scripts
+emove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -CommonSet
 
 # Disconnect (Azure-side) if host unreachable
 .\scripts\disconnect-arc.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
@@ -115,7 +116,7 @@ chmod +x scripts/*.sh
 ./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
 
 # Remove common Arc extensions
-./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> -e DependencyAgentWindows
+./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
 
 # Disconnect (Azure-side) if host unreachable
 ./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
@@ -142,7 +143,7 @@ If you're running these commands in **Azure Cloud Shell**:
   chmod +x scripts/*.sh
   ./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ~/clouddrive/arc-machines.csv
   ./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
-  ./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> -e DependencyAgentWindows
+  ./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
   ./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
   ```
 
