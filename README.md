@@ -2,6 +2,8 @@
 # Azure Arc Decommissioning
 
 This repo contains a practical runbook and helper scripts for safely decommissioning **Azure Arc** at scale (≈30+ servers).
+> **Shells:** This repo uses the **Azure CLI (`az`)**, which runs the same in **PowerShell** and **Bash** (including Azure Cloud Shell). Commands below apply to both unless noted.
+
 
 > Start here: **arc-decommissioning-runbook.md** (put the file at the repo root).
 
@@ -15,6 +17,35 @@ This repo contains a practical runbook and helper scripts for safely decommissio
 1. **Read the runbook**: `./arc-decommissioning-runbook.md`  
 2. **Use scripts** in `./scripts` to list/remove extensions and disconnect machines (PowerShell **or** Bash).  
 3. **Validate**: Defender for Cloud inventory/MDE devices are clean; Policy compliance converges.
+
+
+## Prerequisites
+
+These steps apply to **both PowerShell and Bash** (Azure CLI):
+
+Install/upgrade the **Resource Graph** Azure CLI extension (required for inventory queries):
+
+```bash
+az extension add --name resource-graph --upgrade
+```
+
+(Optional) Set your subscription context:
+
+```bash
+az account set --subscription "<SUBSCRIPTION_ID>"
+```
+
+### Cloud Shell quick tips
+- Cloud Shell defaults to **Bash**; use the `*.sh` scripts and save outputs under `~/clouddrive/`:
+  ```bash
+  chmod +x scripts/*.sh
+  ./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ~/clouddrive/arc-machines.csv
+  ```
+- To use **PowerShell** in Cloud Shell, switch to it (`pwsh`) and run the `*.ps1` scripts:
+  ```powershell
+  .\scripts\list-arc-machines.ps1 -CsvPath ~/clouddrive/arc-machines.csv
+  ```
+
 
 ## Safety checklist (TL;DR)
 - ✅ Defender plan enabled at the correct scope (subscription; RG only if needed)
@@ -54,7 +85,7 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 ### PowerShell
 ```powershell
 # List Arc machines (and save CSV)
-.\scripts\list-arc-machines.ps1 -CsvPath .\arc-machines.csv
+.\scripts\list-arc-machines.ps1 -CsvPath .\rc-machines.csv
 
 # List extensions on a machine
 .\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
@@ -133,3 +164,5 @@ PRs welcome! Keep examples idempotent and safe-by-default. Prefer parameters ove
 
 ## License
 Choose your org standard (MIT recommended for public).
+
+
