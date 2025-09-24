@@ -78,6 +78,42 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 
 ## Usage examples
 
+### Policy hygiene with a Management Group scope
+
+**PowerShell**
+```powershell
+# Management group scope
+$MG = "/providers/Microsoft.Management/managementGroups/<MG_ID>"
+
+# Dry-run (list matches)
+.\scripts\policy-hygiene.ps1 `
+  -Scope $MG
+
+# Delete (preview first)
+.\scripts\policy-hygiene.ps1 `
+  -Scope $MG `
+  -Delete -WhatIf
+
+# Delete for real
+.\scripts\policy-hygiene.ps1 `
+  -Scope $MG `
+  -Delete
+```
+
+**Bash / Cloud Shell**
+```bash
+MG="/providers/Microsoft.Management/managementGroups/<MG_ID>"
+REGEX='(?i)(\bArc\b|ArcBox|AzureMonitor(Windows|Linux)Agent|AMA\b|MDE\.(Windows|Linux)|Change\s*Tracking(-Linux)?)'
+
+# Dry-run
+./scripts/policy-hygiene.sh "$MG" "$REGEX"
+
+# Delete
+./scripts/policy-hygiene.sh "$MG" "$REGEX" true
+```
+
+
+
 💡 **Placeholders**:
 - `<MACHINE_NAME>` = the Arc-connected server's name (Azure resource name)
 - `<RESOURCE_GROUP>` = the Azure resource group that contains the Arc machine resource
@@ -94,7 +130,8 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
   -ResourceGroup <RESOURCE_GROUP>
 
 # Remove an Arc extension by name (example: DependencyAgentWindows)
-.\scripts\remove-arc-extension.ps1 `
+.\scripts
+emove-arc-extension.ps1 `
   -MachineName <MACHINE_NAME> `
   -ResourceGroup <RESOURCE_GROUP> `
   -ExtensionName DependencyAgentWindows
