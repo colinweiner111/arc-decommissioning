@@ -1,7 +1,7 @@
 
 # Azure Arc Decommissioning
 
-This repo contains a practical runbook and helper scripts for safely decommissioning **Azure Arc** at scale (≈30+ servers).
+This repo contains a practical runbook and helper scripts for safely decommissioning **Azure Arc** at scale 
 > **Shells:** This repo uses the **Azure CLI (`az`)**, which runs the same in **PowerShell** and **Bash** (including Azure Cloud Shell). Commands below apply to both unless noted.
 
 
@@ -194,8 +194,6 @@ If you're running these commands in **Azure Cloud Shell**:
 - RBAC: read/delete **Microsoft.HybridCompute/machines** and **connectedmachine/extensions**; read/delete policy assignments (optional)
 - Admin rights on target servers for `azcmagent disconnect`
 
-## Contributing
-PRs welcome! Keep examples idempotent and safe-by-default. Prefer parameters over hard-coded values.
 
 ## License
 Choose your org standard (MIT recommended for public).
