@@ -128,6 +128,41 @@ chmod +x scripts/*.sh
 ./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)' true
 ```
 
+### Policy hygiene with a Management Group scope
+
+**PowerShell**
+```powershell
+# Management group scope
+$MG = "/providers/Microsoft.Management/managementGroups/<MG_ID>"
+
+# Dry-run (list matches)
+.\scripts\policy-hygiene.ps1 `
+  -Scope $MG
+
+# Delete (preview first)
+.\scripts\policy-hygiene.ps1 `
+  -Scope $MG `
+  -Delete -WhatIf
+
+# Delete for real
+.\scripts\policy-hygiene.ps1 `
+  -Scope $MG `
+  -Delete
+```
+
+**Bash / Cloud Shell**
+```bash
+MG="/providers/Microsoft.Management/managementGroups/<MG_ID>"
+REGEX='(?i)(\bArc\b|ArcBox|AzureMonitor(Windows|Linux)Agent|AMA\b|MDE\.(Windows|Linux)|Change\s*Tracking(-Linux)?)'
+
+# Dry-run
+./scripts/policy-hygiene.sh "$MG" "$REGEX"
+
+# Delete
+./scripts/policy-hygiene.sh "$MG" "$REGEX" true
+```
+
+
 ## Azure Cloud Shell tips
 
 If you're running these commands in **Azure Cloud Shell**:
