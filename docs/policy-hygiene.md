@@ -2,92 +2,45 @@
 
 > Need help discovering machines or scopes? See [`docs/inventory.md`](inventory.md) for Azure Resource Graph queries.
 
-This guide shows how to **list and optionally delete Arc-related Azure Policy assignments** using the provided scripts.
-Keep this focused on policy cleanup so decommissioning Arc doesn't leave compliance noise.
+Use these scripts to **list** and (optionally) **delete** Arc-related Azure Policy assignments so decommissioning Arc doesn't leave compliance noise.
 
 ## Prerequisites
-- Azure CLI (`az`) installed (Cloud Shell has it)
-- Permissions to **read** and (if deleting) **delete** policy assignments at the chosen scope
-- Optional: `jq` if you're using the Bash script locally
+- Azure CLI (`az`) available (Cloud Shell is fine)
+- Permissions to **read** and (if deleting) **delete** policy assignments at the scope you choose
 
-## Parameters (both scripts)
-- **Scope** — where to search:
-  - Subscription: `/subscriptions/<SUB_ID>`
-  - Resource group: `/subscriptions/<SUB_ID>/resourceGroups/<RG_NAME>`
-  - Management group: `/providers/Microsoft.Management/managementGroups/<MG_ID>`
-- **Regex** — case-insensitive pattern to match Arc/agent policy assignment names (see examples)
-- **Delete flag** — PowerShell: `-Delete` (with optional `-WhatIf`); Bash: third positional argument `true`
-
-## Safe workflow
+## Recommended workflow
 1. Run a **dry-run** to list matches (no deletion).
-2. Tighten or adjust the regex if any critical assignment appears.
-3. Run with delete (use `-WhatIf` first in PowerShell).
+2. If the list looks right, run the deletion form.
 
-## PowerShell examples
+## PowerShell
 ```powershell
-# Dry-run at subscription scope
-$Scope = "/subscriptions/00000000-0000-0000-0000-000000000000"
+# Subscription scope
+$SUB = "/subscriptions/00000000-0000-0000-0000-000000000000"
 .\scripts\policy-hygiene.ps1 `
-  -Scope $Scope
-
-# Use a custom regex (case-insensitive)
-$Regex = '(?i)(Arc|ArcBox|AzureMonitor(Windows|Linux)Agent|AMA|MDE\.(Windows|Linux)|Change\s*Tracking(-Linux)?)'
+  -Scope $SUB                         # dry-run
 .\scripts\policy-hygiene.ps1 `
-  -Scope $Scope `
-  -Regex $Regex
+  -Scope $SUB -Delete                 # delete
 
-# Delete (preview first)
-.\scripts\policy-hygiene.ps1 `
-  -Scope $Scope `
-  -Delete -WhatIf
-
-# Delete for real
-.\scripts\policy-hygiene.ps1 `
-  -Scope $Scope `
-  -Delete
-```
-
-### Management group scope (PowerShell)
-```powershell
+# Management Group scope
 $MG = "/providers/Microsoft.Management/managementGroups/<MG_ID>"
 .\scripts\policy-hygiene.ps1 `
-  -Scope $MG                # dry-run
+  -Scope $MG                          # dry-run
 .\scripts\policy-hygiene.ps1 `
-  -Scope $MG `
-  -Delete -WhatIf           # preview deletes
+  -Scope $MG -Delete                  # delete
 ```
 
-## Bash / Cloud Shell examples
+## Bash / Cloud Shell
 ```bash
-# Dry-run at subscription scope
+# Subscription scope
 SUB="/subscriptions/00000000-0000-0000-0000-000000000000"
-REGEX='(?i)(Arc|ArcBox|AzureMonitor(Windows|Linux)Agent|AMA|MDE\.(Windows|Linux)|Change\s*Tracking(-Linux)?)'
-./scripts/policy-hygiene.sh "$SUB" "$REGEX"
+./scripts/policy-hygiene.sh "$SUB"          # dry-run
+./scripts/policy-hygiene.sh "$SUB" true     # delete
 
-# Delete at subscription scope
-./scripts/policy-hygiene.sh "$SUB" "$REGEX" true
-```
-
-### Management group scope (Bash)
-```bash
+# Management Group scope
 MG="/providers/Microsoft.Management/managementGroups/<MG_ID>"
-./scripts/policy-hygiene.sh "$MG" "$REGEX"
-./scripts/policy-hygiene.sh "$MG" "$REGEX" true
+./scripts/policy-hygiene.sh "$MG"           # dry-run
+./scripts/policy-hygiene.sh "$MG" true      # delete
 ```
 
-## Advanced matching (optional regex sets)
-You can expand the regex to catch legacy/adjacent items:
-- **Legacy MMA/OMS:** `MicrosoftMonitoringAgent|OmsAgentForLinux|Log\s*Analytics\s*agent`
-- **VM insights:** `VM\s*insights|Deploy\s*VM\s*Insights|DependencyAgent(Windows|Linux)`
-- **Guest config/updates:** `Guest\s*Configuration|Update\s*Manager|Update\s*Management|Patch(ing|Assessment)`
-
-Example combined pattern:
-```powershell
-$Regex = '(?i)(\bArc\b|ArcBox|AzureMonitor(Windows|Linux)Agent|AMA\b|MDE\.(Windows|Linux)|Change\s*Tracking(-Linux)?|MicrosoftMonitoringAgent|OmsAgentForLinux|Log\s*Analytics\s*agent|VM\s*insights|Deploy\s*VM\s*Insights|DependencyAgent(Windows|Linux)|Guest\s*Configuration|Update\s*Manager|Update\s*Management|Patch(ing|Assessment))'
-```
-
-## Notes
-- Start with dry-run. If in doubt, add `-WhatIf` (PowerShell) or omit the third arg (Bash).
-- Prefer specific names (e.g., `AzureMonitorWindowsAgent`) over broad words.
-- Keep an internal allow-list for critical assignments you never want to delete.
-```
+> Advanced matching via custom regex is supported by both scripts, but intentionally omitted here for simplicity.
+> If you need it later, we can add a short appendix with a couple of safe patterns.

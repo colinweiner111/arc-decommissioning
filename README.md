@@ -121,12 +121,13 @@ chmod +x scripts/*.sh
 # Disconnect (Azure-side) if host unreachable
 ./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
 
+
 # Policy hygiene (dry-run)
-./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
+SUB="/subscriptions/00000000-0000-0000-0000-000000000000"
+./scripts/policy-hygiene.sh "$SUB"
 
 # Policy hygiene (perform deletion)
-./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)' true
-```
+./scripts/policy-hygiene.sh "$SUB" true```
 
 ## Azure Cloud Shell tips
 
