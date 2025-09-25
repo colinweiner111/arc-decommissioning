@@ -92,6 +92,8 @@ az extension add --name resource-graph --upgrade
 az graph query -q "resources | where type =~ 'microsoft.hybridcompute/machines' | project name, resourceGroup, subscriptionId, location, id" --first 1000 -o table
 ```
 
+👉 For more inventory queries (filters, CSV export), see [`docs/inventory.md`](docs/inventory.md).
+
 
 
 💡 **Placeholders**:
