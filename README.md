@@ -1,7 +1,7 @@
 
 # Azure Arc Decommissioning
 
-This repo contains a practical runbook and helper scripts for safely decommissioning **Azure Arc** at scale 
+This repo contains a practical runbook and helper scripts for safely decommissioning **Azure Arc** at scale (≈30+ servers).
 > **Shells:** This repo uses the **Azure CLI (`az`)**, which runs the same in **PowerShell** and **Bash** (including Azure Cloud Shell). Commands below apply to both unless noted.
 
 
@@ -78,6 +78,22 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 
 ## Usage examples
 
+### Azure Resource Graph — list Arc machines (quick one-liner)
+
+**Bash / Cloud Shell**
+```bash
+az extension add --name resource-graph --upgrade
+az graph query -q "resources | where type =~ 'microsoft.hybridcompute/machines' | project name, resourceGroup, subscriptionId, location, id" --first 1000 -o table
+```
+
+**PowerShell**
+```powershell
+az extension add --name resource-graph --upgrade
+az graph query -q "resources | where type =~ 'microsoft.hybridcompute/machines' | project name, resourceGroup, subscriptionId, location, id" --first 1000 -o table
+```
+
+
+
 💡 **Placeholders**:
 - `<MACHINE_NAME>` = the Arc-connected server's name (Azure resource name)
 - `<RESOURCE_GROUP>` = the Azure resource group that contains the Arc machine resource
@@ -85,117 +101,79 @@ See **[docs/policy-hygiene.md](./docs/policy-hygiene.md)** for details, regex cu
 ### PowerShell
 ```powershell
 # List Arc machines (and save CSV)
-.\scripts\list-arc-machines.ps1 -CsvPath .\rc-machines.csv
+.\scripts\list-arc-machines.ps1 `
+  -CsvPath .\rc-machines.csv
 
 # List extensions on a machine
-.\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
+.\scripts\list-arc-extensions.ps1 `
+  -MachineName <MACHINE_NAME> `
+  -ResourceGroup <RESOURCE_GROUP>
 
-# Remove common Arc extensions
+# Remove an Arc extension by name (example: DependencyAgentWindows)
 .\scripts
-emove-arc-extension.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP> -CommonSet
+emove-arc-extension.ps1 `
+  -MachineName <MACHINE_NAME> `
+  -ResourceGroup <RESOURCE_GROUP> `
+  -ExtensionName DependencyAgentWindows
 
-# Disconnect (Azure-side) if host unreachable
-.\scripts\disconnect-arc.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
+# Disconnect if host is unreachable (Azure-side)
+.\scripts\disconnect-arc.ps1 `
+  -MachineName <MACHINE_NAME> `
+  -ResourceGroup <RESOURCE_GROUP>
 
 # Policy hygiene (dry-run)
-.\scripts\policy-hygiene.ps1 -Scope /subscriptions/00000000-0000-0000-0000-000000000000
+.\scripts\policy-hygiene.ps1 `
+  -Scope /subscriptions/00000000-0000-0000-0000-000000000000
 
-# Policy hygiene (delete with WhatIf confirmation)
-.\scripts\policy-hygiene.ps1 -Scope /subscriptions/00000000-0000-0000-0000-000000000000 -Delete -WhatIf
+# Policy hygiene (delete with WhatIf)
+.\scripts\policy-hygiene.ps1 `
+  -Scope /subscriptions/00000000-0000-0000-0000-000000000000 `
+  -Delete -WhatIf
 ```
 
 ### Bash / Linux
 ```bash
-# Make scripts executable (first time)
+# First time only: make scripts executable
 chmod +x scripts/*.sh
 
 # List Arc machines (and save CSV)
-./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ./arc-machines.csv
+./scripts/list-arc-machines.sh   "<SUBSCRIPTION_ID>"   ./arc-machines.csv
 
 # List extensions on a machine
-./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
+./scripts/list-arc-extensions.sh   <MACHINE_NAME>   <RESOURCE_GROUP>
 
-# Remove common Arc extensions
-./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
+# Remove an Arc extension by name (example: DependencyAgentWindows)
+./scripts/remove-arc-extension.sh   -m <MACHINE_NAME>   -g <RESOURCE_GROUP>   -e DependencyAgentWindows
 
-# Disconnect (Azure-side) if host unreachable
-./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
+# Disconnect if host is unreachable (Azure-side)
+./scripts/disconnect-arc.sh   -m <MACHINE_NAME>   -g <RESOURCE_GROUP>
 
 # Policy hygiene (dry-run)
-./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
+SUB="$SUB"
+REGEX='(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
+./scripts/policy-hygiene.sh   "$SUB"   "$REGEX"
 
 # Policy hygiene (perform deletion)
-./scripts/policy-hygiene.sh "/subscriptions/00000000-0000-0000-0000-000000000000" '(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)' true
-```
-
-### Policy hygiene with a Management Group scope
-
-**PowerShell**
-```powershell
-# Management group scope
-$MG = "/providers/Microsoft.Management/managementGroups/<MG_ID>"
-
-# Dry-run (list matches)
-.\scripts\policy-hygiene.ps1 `
-  -Scope $MG
-
-# Delete (preview first)
-.\scripts\policy-hygiene.ps1 `
-  -Scope $MG `
-  -Delete -WhatIf
-
-# Delete for real
-.\scripts\policy-hygiene.ps1 `
-  -Scope $MG `
-  -Delete
-```
-
-**Bash / Cloud Shell**
+./scripts/policy-hygiene.sh   "$SUB"   "$REGEX"   true
 ```bash
-MG="/providers/Microsoft.Management/managementGroups/<MG_ID>"
-REGEX='(?i)(\bArc\b|ArcBox|AzureMonitor(Windows|Linux)Agent|AMA\b|MDE\.(Windows|Linux)|Change\s*Tracking(-Linux)?)'
+# First time only: make scripts executable
+chmod +x scripts/*.sh
 
-# Dry-run
-./scripts/policy-hygiene.sh "$MG" "$REGEX"
+# List Arc machines (and save CSV)
+./scripts/list-arc-machines.sh   "<SUBSCRIPTION_ID>"   ./arc-machines.csv
 
-# Delete
-./scripts/policy-hygiene.sh "$MG" "$REGEX" true
-```
+# List extensions on a machine
+./scripts/list-arc-extensions.sh   <MACHINE_NAME>   <RESOURCE_GROUP>
 
+# Remove an Arc extension by name (example: DependencyAgentWindows)
+./scripts/remove-arc-extension.sh   -m <MACHINE_NAME>   -g <RESOURCE_GROUP>   -e DependencyAgentWindows
 
-## Azure Cloud Shell tips
+# Disconnect if host is unreachable (Azure-side)
+./scripts/disconnect-arc.sh   -m <MACHINE_NAME>   -g <RESOURCE_GROUP>
 
-If you're running these commands in **Azure Cloud Shell**:
+# Policy hygiene (dry-run)
+REGEX='(?i)(\bArc\b|ArcBox|Change\s*Tracking|AzureMonitorWindowsAgent|AMA\b|MDE\.Windows)'
+./scripts/policy-hygiene.sh   "/subscriptions/00000000-0000-0000-0000-000000000000"   "$REGEX"
 
-- **Install/upgrade Resource Graph extension** (required for inventory queries):
-  ```bash
-  az extension add --name resource-graph --upgrade
-  ```
-
-- **Bash examples** (Cloud Shell defaults to Bash):
-  ```bash
-  # Persist output in your Cloud Shell drive
-  chmod +x scripts/*.sh
-  ./scripts/list-arc-machines.sh "<SUBSCRIPTION_ID>" ~/clouddrive/arc-machines.csv
-  ./scripts/list-arc-extensions.sh <MACHINE_NAME> <RESOURCE_GROUP>
-  ./scripts/remove-arc-extension.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP> --common-set
-  ./scripts/disconnect-arc.sh -m <MACHINE_NAME> -g <RESOURCE_GROUP>
-  ```
-
-- **PowerShell shell in Cloud Shell**: switch to PowerShell (via UI or `pwsh`) and use the `*.ps1` scripts:
-  ```powershell
-  az extension add --name resource-graph --upgrade
-  .\scripts\list-arc-machines.ps1 -CsvPath ~/clouddrive/arc-machines.csv
-  .\scripts\list-arc-extensions.ps1 -MachineName <MACHINE_NAME> -ResourceGroup <RESOURCE_GROUP>
-  ```
-
-## Requirements
-- **Azure CLI** (with extension: `resource-graph`; Linux requires `jq` for JSON parsing)
-- RBAC: read/delete **Microsoft.HybridCompute/machines** and **connectedmachine/extensions**; read/delete policy assignments (optional)
-- Admin rights on target servers for `azcmagent disconnect`
-
-
-## License
-Choose your org standard (MIT recommended for public).
-
-
+# Policy hygiene (perform deletion)
+./scripts/policy-hygiene.sh   "/subscriptions/00000000-0000-0000-0000-000000000000"   "$REGEX"   true
